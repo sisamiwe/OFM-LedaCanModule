@@ -26,7 +26,6 @@
 #define KO_CONNECTION_LOST      15  // DPT 1.005 (Alarm: Timeout zum Ofen)
 
 
-
 CANGateway::CANGateway() {}
 
 void CANGateway::setup()
@@ -89,78 +88,125 @@ void CANGateway::syncDataToKNX() {
         knx.getGroupObject(KO_CONNECTION_LOST).value(!isOnline, Dpt(1, 5));
     }
 
-    // --- Hauptwerte ---
-    if (_data.combustion_temp.updated || forceSend) {
-        knx.getGroupObject(KO_COMBUSTION_TEMP).value((float)_data.combustion_temp.value, Dpt(9, 1));
-        _data.combustion_temp.updated = false;
+uint32_t nun = millis();
+
+    // Hilfsfunktion/Lambda für Zyklus-Check (Minuten in ms)
+    auto checkCycle = [&](uint32_t lastMs, uint32_t intervalMinutes) {
+        if (intervalMinutes == 0) return false; // 0 = "Nicht senden"
+        return (nun - lastMs >= (intervalMinutes * 60000));
+    };
+
+    // --- 2. COMBUSTION_TEMP (Mit Hysterese & Zyklus) ---
+    float cTemp = (float)_data.combustion_temp.value;
+    if ((Param_CombTempSendChg_1 && abs(cTemp - _lastSentCombTemp) >= Param_CombTempAmount_1) || 
+         checkCycle(_lastCombTempCycle, Param_CombTempCycle_1)) {
+        knx.getGroupObject(KO_COMBUSTION_TEMP).value(cTemp, Dpt(9, 1));
+        _lastSentCombTemp = cTemp;
+        _lastCombTempCycle = nun;
     }
 
-    if (_data.oven_state_num.updated || forceSend) {
+    // --- 3. MAX_COMBUSTION_TEMP (Mit Hysterese & Zyklus) ---
+    float mTemp = (float)_data.max_combustion_temp.value;
+    if ((Param_MaxCombTempSendChg_1 && abs(mTemp - _lastSentMaxTemp) >= Param_MaxCombTempAmount_1) || 
+         checkCycle(_lastMaxTempCycle, Param_MaxCombTempCycle_1)) {
+        knx.getGroupObject(KO_MAX_COMBUSTION_TEMP).value(mTemp, Dpt(9, 1));
+        _lastSentMaxTemp = mTemp;
+        _lastMaxTempCycle = nun;
+    }
+
+    // --- 4. SMOLDERING_TEMP (Mit Hysterese & Zyklus) ---
+    float sTemp = (float)_data.smoldering_temp.value;
+    if ((Param_SmoldTempSendChg_1 && abs(sTemp - _lastSentSmoldTemp) >= Param_SmoldTempAmount_1) || 
+         checkCycle(_lastSmoldTempCycle, Param_SmoldTempCycle_1)) {
+        knx.getGroupObject(KO_SMOLDERING_TEMP).value(sTemp, Dpt(9, 1));
+        _lastSentSmoldTemp = sTemp;
+        _lastSmoldTempCycle = nun;
+    }
+
+    // --- 5. AIRFLAP_ACT (DPT 5.005, Mit Hysterese & Zyklus) ---
+    uint8_t fAct = _data.air_flap_act.value;
+    if ((Param_AirActSendChg_1 && abs((int)fAct - _lastSentAirAct) >= Param_AirActAmount_1) || 
+         checkCycle(_lastAirActCycle, Param_AirActCycle_1)) {
+        knx.getGroupObject(KO_AIR_FLAP_ACT).value(fAct, Dpt(5, 5));
+        _lastSentAirAct = fAct;
+        _lastAirActCycle = nun;
+    }
+
+    // --- 6. AIRFLAP_TARGET (DPT 5.005, Mit Hysterese & Zyklus) ---
+    uint8_t fTrg = _data.air_flap_target.value;
+    if ((Param_AirTrgSendChg_1 && abs((int)fTrg - _lastSentAirTrg) >= Param_AirTrgAmount_1) || 
+         checkCycle(_lastAirTrgCycle, Param_AirTrgCycle_1)) {
+        knx.getGroupObject(KO_AIR_FLAP_TARGET).value(fTrg, Dpt(5, 5));
+        _lastSentAirTrg = fTrg;
+        _lastAirTrgCycle = nun;
+    }
+
+    // --- 7. OVEN_STATE_NUM (Nur Zyklus) ---
+    if (checkCycle(_lastStateNumCycle, Param_StateNumCycle_1)) {
         knx.getGroupObject(KO_OVEN_STATE_NUM).value(_data.oven_state_num.value, Dpt(5, 5));
-        _data.oven_state_num.updated = false;
+        _lastStateNumCycle = nun;
     }
 
-    if (_data.air_flap_act.updated || forceSend) {
-        knx.getGroupObject(KO_AIR_FLAP_ACT).value(_data.air_flap_act.value, Dpt(5, 5));
-        _data.air_flap_act.updated = false;
+    // --- 8. OVEN_STATE_TXT (Nur Zyklus) ---
+    if (checkCycle(_lastStateTxtCycle, Param_StateTxtCycle_1)) {
+        knx.getGroupObject(KO_OVEN_STATE_TXT).value(_data.oven_state_text.value, Dpt(16, 0));
+        _lastStateTxtCycle = nun;
     }
 
-    if (_data.air_flap_target.updated || forceSend) {
-        knx.getGroupObject(KO_AIR_FLAP_TARGET).value(_data.air_flap_target.value, Dpt(5, 5));
-        _data.air_flap_target.updated = false;
+    // --- 9. TREND (Hysterese & Zyklus) ---
+    uint8_t trend = _data.trend.value;
+    if (abs((int)trend - _lastSentTrend) >= Param_TrendAmount_1 || checkCycle(_lastTrendCycle, Param_TrendCycle_1)) {
+        knx.getGroupObject(KO_TREND).value(trend, Dpt(5, 5));
+        _lastSentTrend = trend;
+        _lastTrendCycle = nun;
     }
 
-    if (_data.critical_temperature.updated || forceSend) {
-        knx.getGroupObject(KO_CRITICAL_TEMP_ALARM).value(_data.critical_temperature.value, Dpt(1, 5));
-        _data.critical_temperature.updated = false;
+    // --- 10. OVEN_HEATED (Nur Zyklus) ---
+    if (checkCycle(_lastHeatedCycle, Param_HeatedCycle_1)) {
+        knx.getGroupObject(KO_OVEN_HEATED).value(_data.oven_heated.value, Dpt(1, 1));
+        _lastHeatedCycle = nun;
     }
 
-    // --- Erweiterte Status-Werte ---
-    if (_data.oven_heated.updated || forceSend) {
-        knx.getGroupObject(KO_OVEN_HEATED).value(_data.oven_heated.value, Dpt(1, 3));
-        _data.oven_heated.updated = false;
-    }
-
-    if (_data.ember_bed.updated || forceSend) {
-        knx.getGroupObject(KO_EMBER_BED).value(_data.ember_bed.value, Dpt(1, 2));
-        _data.ember_bed.updated = false;
-    }
-
-    if (_data.heating_error.updated || forceSend) {
-        knx.getGroupObject(KO_HEATING_ERROR).value(_data.heating_error.value, Dpt(1, 5));
+    // --- 11. HEATING_ERROR (Event-basiert bei Update) ---
+    if (_data.heating_error.updated) {
+        knx.getGroupObject(KO_HEATING_ERROR).value(_data.heating_error.value, Dpt(1, 1));
         _data.heating_error.updated = false;
     }
 
-    if (_data.trend.updated || forceSend) {
-        knx.getGroupObject(KO_TREND).value(_data.trend.value, Dpt(6, 1));
-        _data.trend.updated = false;
-    }
-
-    // --- Statistiken ---
-    if (_data.max_combustion_temp.updated || forceSend) {
-        knx.getGroupObject(KO_MAX_COMBUSTION_TEMP).value((float)_data.max_combustion_temp.value, Dpt(9, 1));
-        _data.max_combustion_temp.updated = false;
-    }
-
-    if (_data.smoldering_temp.updated || forceSend) {
-        knx.getGroupObject(KO_SMOLDERING_TEMP).value((float)_data.smoldering_temp.value, Dpt(9, 1));
-        _data.smoldering_temp.updated = false;
-    }
-
-    if (_data.burn_cycles.updated || forceSend) {
+    // --- 12. BURN_CYCLES (Event-basiert bei Update) ---
+    if (_data.burn_cycles.updated) {
         knx.getGroupObject(KO_BURN_CYCLES).value(_data.burn_cycles.value, Dpt(7, 1));
         _data.burn_cycles.updated = false;
     }
 
-    if (_data.heating_error_count.updated || forceSend) {
+    // --- 13. HEATING_ERROR_COUNT (Event-basiert bei Update) ---
+    if (_data.heating_error_count.updated) {
         knx.getGroupObject(KO_HEATING_ERROR_COUNT).value(_data.heating_error_count.value, Dpt(7, 1));
         _data.heating_error_count.updated = false;
     }
 
-    // --- Diagnose ---
-    if (_data.controller_version.updated || forceSend) {
-        knx.getGroupObject(KO_CONTROLLER_VERSION).value(_data.controller_version.value, Dpt(5, 10));
+    // --- 14. CONTROLLER_VERSION (Event-basiert bei Update) ---
+    if (_data.controller_version.updated) {
+        knx.getGroupObject(KO_CONTROLLER_VERSION).value(_data.controller_version.value, Dpt(5, 5));
         _data.controller_version.updated = false;
+    }
+
+    // --- 15. EMBER_BED (Event-basiert) ---
+    if (_data.ember_bed.updated) {
+        knx.getGroupObject(KO_EMBER_BED).value(_data.ember_bed.value, Dpt(1, 1));
+        _data.ember_bed.updated = false;
+    }
+
+    // --- 16. CRITICAL_TEMPERATURE (Event-basiert) ---
+    if (_data.critical_temperature.updated) {
+        knx.getGroupObject(KO_CRITICAL_TEMP_ALARM).value(_data.critical_temperature.value, Dpt(1, 1));
+        _data.critical_temperature.updated = false;
+    }
+
+    // --- 17. CAN_BUS_ERROR (Event-basiert) ---
+    if (_data.can_bus_error.updated) {
+        knx.getGroupObject(KO_CAN_BUS_ERROR).value(_data.can_bus_error.value, Dpt(1, 1));
+        _data.can_bus_error.updated = false;
     }
 
     // Zeitstempel für zyklisches Senden aktualisieren

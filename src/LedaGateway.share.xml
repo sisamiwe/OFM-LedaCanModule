@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<KNX xmlns:op="http://github.com/OpenKNX/OpenKNXproducer" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knx.org/xml/project/14" xmlns="http://knx.org/xml/project/14">
+    <ManufacturerData>
+        <Manufacturer RefId="M-00FA">
+            <ApplicationPrograms>
+                <ApplicationProgram Id="%AID%" ProgramType="ApplicationProgram" MaskVersion="MV-07B0" Name="LedaGatewayModule" LoadProcedureStyle="MergedProcedure" PeiType="0" DefaultLanguage="de" DynamicTableManagement="false" Linkable="true" MinEtsVersion="4.0" ApplicationNumber="0" ApplicationVersion="0">
+                    <Static>
+                        <ParameterTypes>
+                            <ParameterType Id="%AID%_PT-OnOff" Name="OnOff"><Enumeration Text="Aus" Value="0" Id="%AID%_EN-0"/><Enumeration Text="Ein" Value="1" Id="%AID%_EN-1"/></ParameterType>
+                            <ParameterType Id="%AID%_PT-Cycle" Name="Cycle">
+                                <Enumeration Text="Nicht senden" Value="0" Id="%AID%_C-0"/>
+                                <Enumeration Text="1 Min" Value="1" Id="%AID%_C-1"/><Enumeration Text="5 Min" Value="5" Id="%AID%_C-5"/>
+                            </ParameterType>
+                            <ParameterType Id="%AID%_PT-TempChg" Name="TempChg"><Float Min="0.1" Max="20" Step="0.1" Unit="K" Encoding="IEEE-754 Single Precision" /></ParameterType>
+                            <ParameterType Id="%AID%_PT-ValChg" Name="ValChg"><Number Min="1" Max="255" Step="1" /></ParameterType>
+                        </ParameterTypes>
+
+                        <ComObjectTable>
+                            <ComObject Id="%AID%_O-%T%%CCC%000" Name="Heartbeat_%C%" Text="Heartbeat" Number="%K0%" ObjectSize="1 Bit" TransmitFlag="Enabled" DatapointType="DPST-1-1" />
+                            <ComObject Id="%AID%_O-%T%%CCC%001" Name="CombTemp_%C%" Text="Verbrennungstemp." Number="%K1%" ObjectSize="2 Bytes" TransmitFlag="Enabled" DatapointType="DPST-9-1" />
+                            <ComObject Id="%AID%_O-%T%%CCC%002" Name="MaxCombTemp_%C%" Text="Max. Verbrennungstemp." Number="%K2%" ObjectSize="2 Bytes" TransmitFlag="Enabled" DatapointType="DPST-9-1" />
+                            <ComObject Id="%AID%_O-%T%%CCC%003" Name="SmolderingTemp_%C%" Text="Gluttemp." Number="%K3%" ObjectSize="2 Bytes" TransmitFlag="Enabled" DatapointType="DPST-9-1" />
+                            <ComObject Id="%AID%_O-%T%%CCC%004" Name="AirflapAct_%C%" Text="Luftklappe Ist" Number="%K4%" ObjectSize="1 Byte" TransmitFlag="Enabled" DatapointType="DPST-5-5" />
+                            <ComObject Id="%AID%_O-%T%%CCC%005" Name="AirflapTrg_%C%" Text="Luftklappe Soll" Number="%K5%" ObjectSize="1 Byte" TransmitFlag="Enabled" DatapointType="DPST-5-5" />
+                            <ComObject Id="%AID%_O-%T%%CCC%006" Name="OvenStateNum_%C%" Text="Ofen Status Code" Number="%K6%" ObjectSize="1 Byte" TransmitFlag="Enabled" DatapointType="DPST-5-5" />
+                            <ComObject Id="%AID%_O-%T%%CCC%007" Name="OvenStateTxt_%C%" Text="Ofen Status Text" Number="%K7%" ObjectSize="14 Bytes" TransmitFlag="Enabled" DatapointType="DPST-16-0" />
+                            <ComObject Id="%AID%_O-%T%%CCC%008" Name="Trend_%C%" Text="Trend" Number="%K8%" ObjectSize="1 Byte" TransmitFlag="Enabled" DatapointType="DPST-5-5" />
+                            <ComObject Id="%AID%_O-%T%%CCC%009" Name="OvenHeated_%C%" Text="Ofen geheizt" Number="%K9%" ObjectSize="1 Bit" TransmitFlag="Enabled" DatapointType="DPST-1-1" />
+                            <ComObject Id="%AID%_O-%T%%CCC%010" Name="HeatingError_%C%" Text="Heizfehler" Number="%K10%" ObjectSize="1 Bit" TransmitFlag="Enabled" DatapointType="DPST-1-1" />
+                            <ComObject Id="%AID%_O-%T%%CCC%011" Name="BurnCycles_%C%" Text="Abbrandzyklen" Number="%K11%" ObjectSize="2 Bytes" TransmitFlag="Enabled" DatapointType="DPST-7-1" />
+                            <ComObject Id="%AID%_O-%T%%CCC%012" Name="ErrorCount_%C%" Text="Fehlerzähler" Number="%K12%" ObjectSize="2 Bytes" TransmitFlag="Enabled" DatapointType="DPST-7-1" />
+                            <ComObject Id="%AID%_O-%T%%CCC%013" Name="ControllerVer_%C%" Text="Version" Number="%K13%" ObjectSize="1 Byte" TransmitFlag="Enabled" DatapointType="DPST-5-5" />
+                            <ComObject Id="%AID%_O-%T%%CCC%014" Name="EmberBed_%C%" Text="Glutbett" Number="%K14%" ObjectSize="1 Bit" TransmitFlag="Enabled" DatapointType="DPST-1-1" />
+                            <ComObject Id="%AID%_O-%T%%CCC%015" Name="CritTemp_%C%" Text="Kritische Temp." Number="%K15%" ObjectSize="1 Bit" TransmitFlag="Enabled" DatapointType="DPST-1-1" />
+                            <ComObject Id="%AID%_O-%T%%CCC%016" Name="CanError_%C%" Text="CAN Bus Fehler" Number="%K16%" ObjectSize="1 Bit" TransmitFlag="Enabled" DatapointType="DPST-1-1" />
+                        </ComObjectTable>
+                    </Static>
+                </ApplicationProgram>
+            </ApplicationPrograms>
+        </Manufacturer>
+    </ManufacturerData>
+</KNX>
