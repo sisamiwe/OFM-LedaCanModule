@@ -2,8 +2,8 @@
 
 // Change the following 3 lines and adopt to your module names
 #define ModuleVersion_ModuleName "LedaCanModule"
-#define ModuleVersion_knxprod_h THP_ModuleVersion
-#define ModuleVersion_version_h MODULE_THPSensorModule_ETS
+#define ModuleVersion_knxprod_h Leda_ModuleVersion
+#define ModuleVersion_version_h MODULE_LedaCanModule_ETS
 
 // ATTENTION: This file is evaluated during build, by OpenKNXproducer and some build scripts.
 // No changes needed behind this point

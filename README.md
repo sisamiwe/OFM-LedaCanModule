@@ -1,2 +1,2 @@
-# OAM-THPSensorModule
-a temperature, humidity and air pressure sensor implementation also featuring basic binary inputs
+# OAM-LedaCanModule
+Connects to Can-Bus of Leda Controls like Leda LUC or Ledatronic and listens to messages
