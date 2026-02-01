@@ -1,2 +1,2 @@
-# OFM-LedaCanModule
-OpenKNX Functions Mddule to connect to LEDA oven control via CAN
+# OAM-THPSensorModule
+a temperature, humidity and air pressure sensor implementation also featuring basic binary inputs
