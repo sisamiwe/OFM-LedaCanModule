@@ -1,15 +1,11 @@
 {
-    "name": "OFM-THPSensorModule",
-    "version": "0.3.1",
+    "name": "OFM-LedaCanModule",
+    "version": "0.0.1",
     "dependencies":
     [
         {
-            "name": "OneWireNg",
-            "version": "https://github.com/pstolarz/OneWireNg.git#0.13.3"
-        },
-        {
-            "name": "Arduino-Temperature-Control-Library",
-            "version": "https://github.com/milesburton/Arduino-Temperature-Control-Library.git#v4.0.3"
+            "name": "ACAN",
+            "version": "https://github.com/pierremolinaro/acan2515.git#2.1.5"
         }
     ],
     "homepage": "https://openknx.de",
@@ -21,6 +17,6 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/OpenKNX/OFM-THPSensorModule"
+        "url": "https://github.com/sisamiwe/OFM-LedaCanModule"
     }
   }
