@@ -19,8 +19,8 @@ public:
 
 
 private:
-    Data _data;
+    Data _data;             // Enthält die aktuellen Werte vom CAN-Bus
+    Data _lastSentData;     // Enthält die Werte, die zuletzt erfolgreich an KNX gesendet wurden
     void syncDataToKNX();
-    uint32_t _lastCyclicSend = 0;
-    const uint32_t CYCLIC_SEND_INTERVAL = 300000;
+
 };
